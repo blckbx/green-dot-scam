@@ -1,26 +1,43 @@
 name: Daily Green Dot
-on: [push, pull_request]
-jobs:
-  hello:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Say hello (and nothing else)
-      run: echo "Hello World" 
-
 on:
   schedule:
     - cron: '0 0 * * *'  # Midnight UTC daily
+  push:  # For code pushes
+  pull_request:  # For PRs
+  workflow_dispatch:  # Manual testing
+
 jobs:
-  commit:
+  daily-update:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'  # Only cron/manual
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Configure Git identity
+      run: |
+        git config --local user.email "74455114+blckbx@users.noreply.github.com"
+        git config --local user.name "blckbx"
+
     - name: Update date
       run: |
         echo "$(date)" > last-update.txt
-        git config user.email "74455114+blckbx@users.noreply.github.com"
-        git config user.name "blckbx"
-        git add last-update.txt
-        git commit -m "Daily update $(date)"
-        git push
+        git add last-update.txt || true
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Daily update $(date)"
+          git push
+        fi
+
+  ci-check:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Echo hello world
+      run: echo "Hello World"
