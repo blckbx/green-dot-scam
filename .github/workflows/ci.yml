@@ -1,4 +1,13 @@
 name: Daily Green Dot
+on: [push, pull_request]
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Say hello (and nothing else)
+      run: echo "Hello World" 
+
 on:
   schedule:
     - cron: '0 0 * * *'  # Midnight UTC daily
