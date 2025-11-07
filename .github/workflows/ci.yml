@@ -1,17 +1,17 @@
-   name: Daily Green Dot
-   on:
-     schedule:
-       - cron: '0 0 * * *'  # Midnight UTC daily
-   jobs:
-     commit:
-       runs-on: ubuntu-latest
-       steps:
-       - uses: actions/checkout@v4
-       - name: Update date
-         run: |
-           echo "$(date)" > last-update.txt
-           git config user.email "74455114+blckbx@users.noreply.github.com"
-           git config user.name "blckbx"
-           git add last-update.txt
-           git commit -m "Daily update $(date)"
-           git push
+name: Daily Green Dot
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Midnight UTC daily
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Update date
+      run: |
+        echo "$(date)" > last-update.txt
+        git config user.email "74455114+blckbx@users.noreply.github.com"
+        git config user.name "blckbx"
+        git add last-update.txt
+        git commit -m "Daily update $(date)"
+        git push
