@@ -1,7 +1,7 @@
 name: Daily Green Dot
 on:
   schedule:
-    - cron: '0 0 * * *'  # Midnight UTC daily
+    - cron: '*/5 * * * *'  # Midnight UTC daily
   push:  # For code pushes
   pull_request:  # For PRs
   workflow_dispatch:  # Manual testing
