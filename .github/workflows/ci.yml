@@ -1,9 +1,21 @@
-name: Green Dot Scam
-on: [push, pull_request]
+name: Daily Green Dot
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Midnight UTC daily
+  workflow_dispatch:  # Optional: manual trigger
 jobs:
-  hello:
+  commit:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Say hello (and nothing else)
-      run: echo "Hello World"  # Boom, green dot earned! 🎉   
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.USERINFO }}  # Authenticates as you
+        fetch-depth: 0  # For full history if needed
+
+    - name: Update date
+      run: |
+        echo "$(date)" > last-update.txt
+        git add last-update.txt
+        git commit -m "Daily update $(date)"
+        git push  # Token handles auth automatically
