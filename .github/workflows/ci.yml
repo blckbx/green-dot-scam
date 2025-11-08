@@ -60,22 +60,40 @@ jobs:
       run: |
         touch streak.txt
 
-        # Loop back 365 days, commit once per day with historical date
+    - name: Backfill 365 days with variable commits (1-20 per day, 9-5 only)
+      run: |
+        # Create file for changes
+        touch streak.txt
+
+        # Outer loop: 365 days back
         for i in {0..364}; do
-          # Calculate date: today minus i days (UTC for GitHub consistency)
-          DATE=$(date -d "${i} days ago" '+%Y-%m-%dT%H:%M:%SZ')
+          # Historical day start (UTC)
+          DAY_START=$(date -d "${i} days ago" '+%Y-%m-%d 00:00:00 UTC')
 
-          # Amend/add a tiny change (e.g., append day number)
-          echo "Day -$i: $(date -d "${i} days ago" '+%Y-%m-%d')" >> streak.txt
-          git add streak.txt
+          # Random commits for this day: 1-20
+          COMMITS_PER_DAY=$((1 + RANDOM % 20))  # 1 to 20
+          echo "Backfilling day -$i with $COMMITS_PER_DAY commits (9-5 UTC)"
 
-          # Commit with both author and committer date set to historical
-          GIT_AUTHOR_DATE="$DATE" GIT_COMMITTER_DATE="$DATE" \
-            git commit --allow-empty -m "Backfill streak: $DATE" --date="$DATE"
+          # Inner loop: Spread across working hours (9:00-17:00, 8-hour window)
+          for j in $(seq 1 $COMMITS_PER_DAY); do
+            # Evenly space in 9-17: Start at 9, end at 17 (8 hours total)
+            TOTAL_HOURS=8
+            HOUR_OFFSET=$(( (j * TOTAL_HOURS / COMMITS_PER_DAY) - 1 ))  # 0-7
+            HOUR=$((9 + HOUR_OFFSET))  # 9 to 16 (last at ~17:00)
+            MINS=$(( RANDOM % 60 ))  # Random minutes 0-59
+            SECS=$(( RANDOM % 60 ))  # Random seconds 0-59 for extra variance
+            DATE=$(date -d "$DAY_START $HOUR:$MINS:$SECS UTC" '+%Y-%m-%dT%H:%M:%SZ')
+
+            # Tiny unique change
+            echo "Work commit $j/$COMMITS_PER_DAY on $(date -d "$DATE" '+%Y-%m-%d %H:%M:%S')" >> streak.txt
+            git add streak.txt
+
+            # Commit with historical date
+            GIT_AUTHOR_DATE="$DATE" GIT_COMMITTER_DATE="$DATE" \
+              git commit --allow-empty -m "Backfill: Work activity on $DATE" --date="$DATE"
+          done
         done
 
-        # Sync with remote before force-push (fixes stale info)
-        git pull --rebase origin main  # Assumes main branch; swap if yours is different
-
-        # Now force-push the rewritten history
-        git push --force-with-lease origin HEAD:main   
+        # Sync and force-push
+        git pull --rebase origin main
+        git push --force-with-lease origin HEAD:main
