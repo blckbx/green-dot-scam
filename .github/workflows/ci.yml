@@ -67,25 +67,31 @@ jobs:
 
         # Outer loop: 365 days back
         for i in {0..364}; do
-          # Historical day start (UTC)
-          DAY_START=$(date -d "${i} days ago" '+%Y-%m-%d 00:00:00 UTC')
+          # Historical day (UTC)
+          HIST_DATE=$(date -d "${i} days ago" '+%Y-%m-%d')
 
           # Random commits for this day: 1-20
-          COMMITS_PER_DAY=$((1 + RANDOM % 20))  # 1 to 20
+          COMMITS_PER_DAY=$((1 + RANDOM % 20))
           echo "Backfilling day -$i with $COMMITS_PER_DAY commits (9-5 UTC)"
 
-          # Inner loop: Spread across working hours (9:00-17:00, 8-hour window)
+          # Inner loop: Spread across working hours (9:00-17:00)
           for j in $(seq 1 $COMMITS_PER_DAY); do
-            # Evenly space in 9-17: Start at 9, end at 17 (8 hours total)
-            TOTAL_HOURS=8
-            HOUR_OFFSET=$(( (j * TOTAL_HOURS / COMMITS_PER_DAY) - 1 ))  # 0-7
-            HOUR=$((9 + HOUR_OFFSET))  # 9 to 16 (last at ~17:00)
-            MINS=$(( RANDOM % 60 ))  # Random minutes 0-59
-            SECS=$(( RANDOM % 60 ))  # Random seconds 0-59 for extra variance
-            DATE=$(date -d "$DAY_START $HOUR:$MINS:$SECS UTC" '+%Y-%m-%dT%H:%M:%SZ')
+            # Space evenly in 9-17 (8-hour window)
+            TOTAL_SLOTS=8
+            HOUR_OFFSET=$(( (j * TOTAL_SLOTS / COMMITS_PER_DAY) - 1 ))
+            HOUR=$((9 + HOUR_OFFSET))
+            MINS=$(( RANDOM % 60 ))
+            SECS=$(( RANDOM % 60 ))
+
+            # Build clean datetime string for date command
+            TIME_STR="${HOUR}:${MINS}:${SECS}"
+            FULL_DATE="${HIST_DATE} ${TIME_STR}"
+
+            # Parse to ISO format
+            DATE=$(date --date "${FULL_DATE} UTC" '+%Y-%m-%dT%H:%M:%SZ')
 
             # Tiny unique change
-            echo "Work commit $j/$COMMITS_PER_DAY on $(date -d "$DATE" '+%Y-%m-%d %H:%M:%S')" >> streak.txt
+            echo "Work commit $j/$COMMITS_PER_DAY on ${FULL_DATE} UTC" >> streak.txt
             git add streak.txt
 
             # Commit with historical date
