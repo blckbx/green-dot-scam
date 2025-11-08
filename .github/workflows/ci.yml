@@ -8,7 +8,7 @@ on:
 
 jobs:
   daily-update:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'  # Only cron/manual
+    if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repo
@@ -32,16 +32,6 @@ jobs:
           git push
         fi
 
-  ci-check:
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
-
-    - name: Echo hello world
-      run: echo "Hello World"
-
   backfill-green-dots:
     if: github.event_name == 'workflow_dispatch'  # Only manual trigger
     runs-on: ubuntu-latest
@@ -59,6 +49,7 @@ jobs:
     - name: Backfill 365 days with variable commits (1-5 per day, 9-5 only)
       run: |
         # Create file for changes
+        rm streak.txt
         touch streak.txt
 
         # Outer loop: 365 days back
