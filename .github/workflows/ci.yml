@@ -56,11 +56,7 @@ jobs:
         git config --local user.email "74455114+blckbx@users.noreply.github.com"
         git config --local user.name "blckbx"
 
-    - name: Backfill 365 days of green dots
-      run: |
-        touch streak.txt
-
-    - name: Backfill 365 days with variable commits (1-20 per day, 9-5 only)
+    - name: Backfill 365 days with variable commits (1-5 per day, 9-5 only)
       run: |
         # Create file for changes
         touch streak.txt
@@ -70,8 +66,8 @@ jobs:
           # Historical day (UTC)
           HIST_DATE=$(date -d "${i} days ago" '+%Y-%m-%d')
 
-          # Random commits for this day: 1-20
-          COMMITS_PER_DAY=$((1 + RANDOM % 20))
+          # Random commits for this day: 1-5
+          COMMITS_PER_DAY=$((1 + RANDOM % 5))
           echo "Backfilling day -$i with $COMMITS_PER_DAY commits (9-5 UTC)"
 
           # Inner loop: Spread across working hours (9:00-17:00)
