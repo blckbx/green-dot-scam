@@ -74,5 +74,8 @@ jobs:
             git commit --allow-empty -m "Backfill streak: $DATE" --date="$DATE"
         done
 
-        # Force-push the rewritten history (warning: rewrites all commits!)
-        git push --force-with-lease origin HEAD:main  # Assumes main branch; swap if needed      
+        # Sync with remote before force-push (fixes stale info)
+        git pull --rebase origin main  # Assumes main branch; swap if yours is different
+
+        # Now force-push the rewritten history
+        git push --force-with-lease origin HEAD:main   
