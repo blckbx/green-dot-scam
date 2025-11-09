@@ -48,9 +48,8 @@ jobs:
 
     - name: Backfill 365 days with variable commits (1-5 per day, 9-5 only)
       run: |
-        # Create file for changes
-        rm streak.txt
-        touch streak.txt
+        # Empty file for clean start
+        echo "" > streak.txt
 
         # Outer loop: 365 days back
         for i in {0..364}; do
@@ -70,8 +69,13 @@ jobs:
             MINS=$(( RANDOM % 60 ))
             SECS=$(( RANDOM % 60 ))
 
+            # Pad to two digits for proper formatting
+            HOUR_PAD=$(printf "%02d" $HOUR)
+            MINS_PAD=$(printf "%02d" $MINS)
+            SECS_PAD=$(printf "%02d" $SECS)
+
             # Build clean datetime string for date command
-            TIME_STR="${HOUR}:${MINS}:${SECS}"
+            TIME_STR="${HOUR_PAD}:${MINS_PAD}:${SECS_PAD}"
             FULL_DATE="${HIST_DATE} ${TIME_STR}"
 
             # Parse to ISO format
