@@ -52,7 +52,7 @@ jobs:
         echo "" > streak.txt
 
         # Outer loop: 365 days back
-        for i in {0..364}; do
+        for i in {0..270}; do
           # Historical day (UTC)
           HIST_DATE=$(date -d "${i} days ago" '+%Y-%m-%d')
 
