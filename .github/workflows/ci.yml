@@ -46,18 +46,18 @@ jobs:
         git config --local user.email "74455114+blckbx@users.noreply.github.com"
         git config --local user.name "blckbx"
 
-    - name: Backfill 365 days with variable commits (1-5 per day, 9-5 only)
+    - name: Backfill 365 days with variable commits (1-10 per day, 9-5 only)
       run: |
         # Empty file for clean start
         echo "" > streak.txt
 
         # Outer loop: 365 days back
-        for i in {0..270}; do
+        for i in {0..364}; do
           # Historical day (UTC)
           HIST_DATE=$(date -d "${i} days ago" '+%Y-%m-%d')
 
-          # Random commits for this day: 1-5
-          COMMITS_PER_DAY=$((1 + RANDOM % 5))
+          # Random commits for this day: 1-10
+          COMMITS_PER_DAY=$((1 + RANDOM % 10))
           echo "Backfilling day -$i with $COMMITS_PER_DAY commits (9-5 UTC)"
 
           # Inner loop: Spread across working hours (9:00-17:00)
